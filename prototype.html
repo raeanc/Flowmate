@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowMate — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --rose:    #F2698A;
+    --rose-lt: #FDE8EE;
+    --rose-md: #F7B4C5;
+    --plum:    #8B5CF6;
+    --plum-lt: #EDE9FE;
+    --plum-md: #C4B5FD;
+    --blush:   #FDF2F5;
+    --cream:   #FFFAF9;
+    --text:    #2D1B25;
+    --muted:   #9A7882;
+    --white:   #FFFFFF;
+    --radius:  18px;
+    --shadow:  0 4px 24px rgba(242,105,138,.12);
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F9EEF2;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 60px;
+  }
+ 
+  /* Background blobs */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::before {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(242,105,138,.18) 0%, transparent 70%);
+    top: -100px; left: -100px;
+  }
+  body::after {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(139,92,246,.14) 0%, transparent 70%);
+    bottom: -80px; right: -80px;
+  }
+ 
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+  }
+ 
+  /* App header */
+  .app-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .app-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--rose);
+    letter-spacing: -0.5px;
+  }
+  .app-logo span { color: var(--plum); font-style: italic; }
+  .app-tagline {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+    letter-spacing: .3px;
+  }
+ 
+  /* Nav tabs */
+  .nav {
+    display: flex;
+    background: var(--white);
+    border-radius: 50px;
+    padding: 5px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(242,105,138,.1);
+    gap: 2px;
+  }
+  .nav-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 9px 4px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    white-space: nowrap;
+  }
+  .nav-btn .icon { font-size: 16px; }
+  .nav-btn.active {
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    color: var(--white);
+    box-shadow: 0 2px 10px rgba(242,105,138,.35);
+  }
+ 
+  /* Screens */
+  .screen { display: none; animation: fadeUp .3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+ 
+  /* Cards */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+ 
+  /* Section label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 10px;
+    margin-top: 6px;
+  }
+ 
+  /* ───── SOS SCREEN ───── */
+  .sos-hero {
+    background: linear-gradient(135deg, #FDE8EE 0%, #EDE9FE 100%);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sos-hero::before {
+    content: '🌸';
+    font-size: 80px;
+    position: absolute;
+    opacity: .08;
+    top: -10px; right: -10px;
+  }
+  .sos-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .sos-hero-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .sos-btn {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, var(--rose), #E0507A);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 30px rgba(242,105,138,.5), 0 0 0 12px rgba(242,105,138,.12);
+    transition: transform .15s ease, box-shadow .15s ease;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    line-height: 1.2;
+  }
+  .sos-btn:hover { transform: scale(1.05); box-shadow: 0 8px 40px rgba(242,105,138,.6), 0 0 0 16px rgba(242,105,138,.12); }
+  .sos-btn:active { transform: scale(.97); }
+  .sos-btn .sos-icon { font-size: 22px; }
+ 
+  /* SOS sent state */
+  .sos-sent { display: none; }
+  .sos-sent.visible { display: block; }
+  .sos-sent-card {
+    background: linear-gradient(135deg, #FDE8EE, #EDE9FE);
+    border-radius: var(--radius);
+    padding: 22px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .pulse-ring {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--rose);
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    color: white;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(242,105,138,.5); }
+    50%      { box-shadow: 0 0 0 16px rgba(242,105,138,0); }
+  }
+ 
+  /* Supply selector */
+  .supply-chips {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+  }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 50px;
+    border: 1.5px solid var(--rose-md);
+    background: var(--rose-lt);
+    color: var(--rose);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .chip.selected, .chip:hover {
+    background: var(--rose);
+    color: white;
+    border-color: var(--rose);
+  }
+  .chip.plum { border-color: var(--plum-md); background: var(--plum-lt); color: var(--plum); }
+  .chip.plum.selected, .chip.plum:hover { background: var(--plum); color: white; border-color: var(--plum); }
+ 
+  /* Nearby helpers */
+  .helper-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #F5EDF0;
+  }
+  .helper-row:last-child { border-bottom: none; }
+  .helper-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .helper-info { flex: 1; }
+  .helper-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .helper-dist { font-size: 12px; color: var(--muted); }
+  .helper-pts {
+    font-size: 11px; font-weight: 500;
+    color: var(--plum);
+    background: var(--plum-lt);
+    padding: 3px 8px;
+    border-radius: 50px;
+  }
+ 
+  /* Request card */
+  .request-card {
+    background: linear-gradient(135deg, var(--rose-lt), var(--plum-lt));
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--rose-md);
+  }
+  .request-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .request-user { display: flex; align-items: center; gap: 8px; }
+  .request-dist {
+    font-size: 12px; color: var(--muted);
+    background: white;
+    padding: 3px 8px; border-radius: 50px;
+  }
+  .request-needs { font-size: 13px; color: var(--text); margin-bottom: 10px; line-height: 1.4; }
+  .btn-row { display: flex; gap: 8px; }
+ 
+  /* Buttons */
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    color: white;
+    box-shadow: 0 3px 12px rgba(242,105,138,.3);
+  }
+  .btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-ghost {
+    background: white;
+    color: var(--muted);
+    border: 1.5px solid #F0E4E9;
+  }
+ 
+  /* ───── COMMUNITY SCREEN ───── */
+  .community-header {
+    background: linear-gradient(135deg, var(--rose-lt), var(--plum-lt));
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .community-header-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+  .community-header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+ 
+  .ask-btn {
+    padding: 10px 16px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 3px 12px rgba(242,105,138,.3);
+  }
+ 
+  .filter-row {
+    display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px;
+    padding-bottom: 4px; scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 1.5px solid #F0E4E9;
+    background: white;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-chip.active, .filter-chip:hover {
+    background: var(--rose-lt);
+    color: var(--rose);
+    border-color: var(--rose-md);
+  }
+ 
+  .post-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(242,105,138,.07);
+    border: 1px solid #F8EEF2;
+  }
+  .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .post-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--rose-lt);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .post-meta { flex: 1; }
+  .post-author { font-size: 13px; font-weight: 500; color: var(--text); }
+  .post-time { font-size: 11px; color: var(--muted); }
+  .post-tag {
+    font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 50px;
+    letter-spacing: .3px;
+  }
+  .tag-gyn { background: #EDE9FE; color: var(--plum); }
+  .tag-story { background: #FDE8EE; color: var(--rose); }
+  .tag-anon { background: #F3F4F6; color: #6B7280; }
+  .tag-tip  { background: #D1FAE5; color: #065F46; }
+  .post-text { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+  .post-actions { display: flex; gap: 14px; }
+  .post-action {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--muted);
+    cursor: pointer;
+    transition: color .2s;
+    background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .post-action:hover { color: var(--rose); }
+  .post-action .act-icon { font-size: 14px; }
+ 
+  /* Ask modal overlay */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(45,27,37,.4);
+    backdrop-filter: blur(4px);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    width: 100%; max-width: 420px;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text); margin-bottom: 16px; }
+  .toggle-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .toggle-option {
+    padding: 7px 14px;
+    border-radius: 50px;
+    border: 1.5px solid #F0E4E9;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--muted);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .toggle-option.on { background: var(--plum-lt); border-color: var(--plum-md); color: var(--plum); }
+  textarea {
+    width: 100%;
+    border: 1.5px solid #F0E4E9;
+    border-radius: 14px;
+    padding: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    resize: none;
+    margin-bottom: 14px;
+    background: var(--blush);
+    outline: none;
+    transition: border-color .2s;
+  }
+  textarea:focus { border-color: var(--rose-md); }
+ 
+  /* ───── POINTS SCREEN ───── */
+  .points-hero {
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    color: white;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .points-hero::before {
+    content: '✨';
+    font-size: 120px;
+    position: absolute;
+    opacity: .08;
+    top: -20px; right: -20px;
+  }
+  .points-label { font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; opacity: .8; margin-bottom: 6px; }
+  .points-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .points-sub { font-size: 13px; opacity: .8; }
+ 
+  .badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .badge-card {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(242,105,138,.08);
+    border: 1px solid #F8EEF2;
+  }
+  .badge-icon { font-size: 32px; margin-bottom: 6px; display: block; }
+  .badge-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .badge-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .badge-card.locked { opacity: .45; filter: grayscale(.6); }
+ 
+  .history-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #F5EDF0;
+  }
+  .history-row:last-child { border-bottom: none; }
+  .history-left { display: flex; align-items: center; gap: 10px; }
+  .history-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--rose-lt);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .history-action { font-size: 13px; color: var(--text); font-weight: 500; }
+  .history-time   { font-size: 11px; color: var(--muted); }
+  .history-pts    { font-size: 14px; font-weight: 700; color: var(--rose); }
+ 
+  /* Leaderboard */
+  .leader-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F5EDF0;
+  }
+  .leader-row:last-child { border-bottom: none; }
+  .leader-rank { font-size: 15px; width: 24px; text-align: center; }
+  .leader-av {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--rose-lt); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .leader-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); }
+  .leader-pts  { font-size: 13px; font-weight: 600; color: var(--plum); }
+ 
+  /* ───── PROFILE SCREEN ───── */
+  .profile-hero {
+    background: linear-gradient(135deg, var(--rose-lt), var(--plum-lt));
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .profile-av {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 4px 16px rgba(242,105,138,.35);
+  }
+  .profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; color: var(--text);
+  }
+  .profile-handle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .profile-stats {
+    display: flex; justify-content: center; gap: 32px;
+    margin-top: 18px;
+  }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); }
+  .stat-lbl { font-size: 11px; color: var(--muted); }
+ 
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #F5EDF0;
+    cursor: pointer;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-left { display: flex; align-items: center; gap: 10px; }
+  .settings-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .settings-label { font-size: 14px; color: var(--text); font-weight: 500; }
+  .settings-val   { font-size: 13px; color: var(--muted); }
+  .chevron { font-size: 14px; color: var(--muted); }
+ 
+  /* Toggle switch */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider-sw {
+    position: absolute; inset: 0;
+    background: #E5D5DA; border-radius: 50px;
+    transition: .3s;
+  }
+  .slider-sw::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    left: 3px; top: 3px;
+    transition: .3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+  .switch input:checked + .slider-sw { background: linear-gradient(135deg, var(--rose), var(--plum)); }
+  .switch input:checked + .slider-sw::before { transform: translateX(20px); }
+ 
+  /* Premium banner */
+  .premium-banner {
+    background: linear-gradient(135deg, var(--rose), var(--plum));
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .premium-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: white;
+  }
+  .premium-text p { font-size: 12px; color: rgba(255,255,255,.8); margin-top: 2px; }
+  .premium-btn {
+    padding: 8px 16px;
+    background: white;
+    color: var(--rose);
+    border: none;
+    border-radius: 50px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+ 
+  /* Cycle tracker mini */
+  .cycle-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .cycle-phases {
+    display: flex; justify-content: space-between;
+    margin-top: 14px; margin-bottom: 8px;
+  }
+  .phase {
+    flex: 1; text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .phase.current {
+    background: var(--rose-lt);
+    color: var(--rose);
+    font-weight: 600;
+  }
+  .phase-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #F0E4E9; margin: 0 auto 5px;
+  }
+  .phase.current .phase-dot { background: var(--rose); }
+  .cycle-bar {
+    height: 6px; border-radius: 50px;
+    background: var(--rose-lt);
+    position: relative; overflow: hidden;
+  }
+  .cycle-fill {
+    height: 100%;
+    width: 38%;
+    background: linear-gradient(90deg, var(--rose), var(--plum));
+    border-radius: 50px;
+  }
+  .cycle-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+ 
+  /* Ad banner mock */
+  .ad-banner {
+    background: #F9F5FF;
+    border: 1.5px dashed var(--plum-md);
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--plum);
+    margin-bottom: 14px;
+    opacity: .6;
+  }
+ 
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-logo">Flow<span>mate</span></div>
+    <div class="app-tagline">your cycle, your community ✿</div>
+  </div>
+ 
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('sos', this)">
+      <span class="icon">🆘</span> SOS
+    </button>
+    <button class="nav-btn" onclick="showScreen('community', this)">
+      <span class="icon">💬</span> Community
+    </button>
+    <button class="nav-btn" onclick="showScreen('points', this)">
+      <span class="icon">⭐</span> Points
+    </button>
+    <button class="nav-btn" onclick="showScreen('profile', this)">
+      <span class="icon">🌸</span> Profile
+    </button>
+  </nav>
+ 
+  <!-- ── SOS SCREEN ── -->
+  <div id="screen-sos" class="screen active">
+ 
+    <!-- Normal state -->
+    <div id="sos-normal">
+      <div class="sos-hero">
+        <div class="card-title" style="margin-bottom:8px; font-size:20px;">Need help right now?</div>
+        <div class="sos-hero-sub">Tap to alert nearby FlowMate users within 1km of you.</div>
+        <button class="sos-btn" onclick="sendSOS()">
+          <span class="sos-icon">🩸</span>
+          <span>SOS</span>
+        </button>
+        <div style="margin-top:14px;font-size:12px;color:var(--muted);">12 users active within 1km</div>
+      </div>
+ 
+      <div class="section-label">What do you need?</div>
+      <div class="card" style="padding:16px;">
+        <div class="supply-chips">
+          <div class="chip selected" onclick="toggleChip(this)">🩹 Pad</div>
+          <div class="chip" onclick="toggleChip(this)">💧 Tampon</div>
+          <div class="chip" onclick="toggleChip(this)">🔵 Menstrual cup</div>
+          <div class="chip plum" onclick="toggleChip(this)">💊 Painkillers</div>
+          <div class="chip plum" onclick="toggleChip(this)">🍫 Chocolate</div>
+          <div class="chip plum" onclick="toggleChip(this)">🧣 Hand warmer</div>
+        </div>
+        <div class="card-sub" style="margin-bottom:0;font-size:12px;">Select what you need before sending your request.</div>
+      </div>
+ 
+      <div class="section-label">Incoming requests nearby</div>
+      <div class="request-card">
+        <div class="request-header">
+          <div class="request-user">
+            <div class="helper-avatar" style="background:var(--rose-lt);width:32px;height:32px;font-size:14px;">🌷</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);">Anonymous</div>
+              <div style="font-size:11px;color:var(--muted);">2 min ago</div>
+            </div>
+          </div>
+          <div class="request-dist">📍 0.3km</div>
+        </div>
+        <div class="request-needs">Needs: Pad · Painkillers — "Caught off guard at the library 😭"</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="acceptRequest(this)">✓ I can help! (+15 pts)</button>
+          <button class="btn btn-ghost">Pass</button>
+        </div>
+      </div>
+ 
+      <div class="request-card">
+        <div class="request-header">
+          <div class="request-user">
+            <div class="helper-avatar" style="background:var(--plum-lt);width:32px;height:32px;font-size:14px;">🫧</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);">Anonymous</div>
+              <div style="font-size:11px;color:var(--muted);">8 min ago</div>
+            </div>
+          </div>
+          <div class="request-dist">📍 0.7km</div>
+        </div>
+        <div class="request-needs">Needs: Tampon — "At Raffles Place MRT, please help 🙏"</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="acceptRequest(this)">✓ I can help! (+15 pts)</button>
+          <button class="btn btn-ghost">Pass</button>
+        </div>
+      </div>
+ 
+      <div class="ad-banner">📢 Ad — Kotex Ultra Thin Pads — Try now →</div>
+    </div>
+ 
+    <!-- SOS sent state -->
+    <div id="sos-sent" class="sos-sent">
+      <div class="sos-sent-card">
+        <div class="pulse-ring">🔔</div>
+        <div class="card-title" style="margin-bottom:6px;">Help request sent!</div>
+        <div class="card-sub" style="margin-bottom:0;">Alerting 12 nearby users. You'll be notified when someone accepts.</div>
+      </div>
+ 
+      <div class="section-label">Nearby helpers</div>
+      <div class="card" style="padding:16px;">
+        <div class="helper-row">
+          <div class="helper-avatar" style="background:var(--rose-lt);">🌸</div>
+          <div class="helper-info">
+            <div class="helper-name">Sarah K.</div>
+            <div class="helper-dist">0.2km · Responding…</div>
+          </div>
+          <div class="helper-pts">⭐ 340 pts</div>
+        </div>
+        <div class="helper-row">
+          <div class="helper-avatar" style="background:#EDE9FE;">🌷</div>
+          <div class="helper-info">
+            <div class="helper-name">Priya M.</div>
+            <div class="helper-dist">0.5km · Notified</div>
+          </div>
+          <div class="helper-pts">⭐ 210 pts</div>
+        </div>
+        <div class="helper-row">
+          <div class="helper-avatar" style="background:#FFF3E4;">🌼</div>
+          <div class="helper-info">
+            <div class="helper-name">Jess L.</div>
+            <div class="helper-dist">0.8km · Notified</div>
+          </div>
+          <div class="helper-pts">⭐ 155 pts</div>
+        </div>
+      </div>
+ 
+      <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="cancelSOS()">Cancel request</button>
+    </div>
+  </div>
+ 
+  <!-- ── COMMUNITY SCREEN ── -->
+  <div id="screen-community" class="screen">
+    <div class="community-header">
+      <div class="community-header-text">
+        <h2>Community</h2>
+        <p>Ask, share & support ✿</p>
+      </div>
+      <button class="ask-btn" onclick="openModal()">+ Ask</button>
+    </div>
+ 
+    <div class="filter-row">
+      <div class="filter-chip active" onclick="setFilter(this)">All</div>
+      <div class="filter-chip" onclick="setFilter(this)">💬 Questions</div>
+      <div class="filter-chip" onclick="setFilter(this)">📖 Stories</div>
+      <div class="filter-chip" onclick="setFilter(this)">💡 Tips</div>
+      <div class="filter-chip" onclick="setFilter(this)">👩‍⚕️ Gynaecologist</div>
+    </div>
+ 
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar">🤍</div>
+        <div class="post-meta">
+          <div class="post-author">Anonymous</div>
+          <div class="post-time">2h ago</div>
+        </div>
+        <span class="post-tag tag-gyn">👩‍⚕️ Tagged Gynae</span>
+      </div>
+      <div class="post-text">My cycle has been irregular for 6 months — sometimes 45 days apart. Should I be worried? Has anyone experienced this?</div>
+      <div class="post-actions">
+        <button class="post-action" onclick="likePost(this)"><span class="act-icon">🤍</span> 24</button>
+        <button class="post-action"><span class="act-icon">💬</span> 8 replies</button>
+        <button class="post-action"><span class="act-icon">🔗</span> Share</button>
+      </div>
+    </div>
+ 
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:var(--plum-lt);">🌸</div>
+        <div class="post-meta">
+          <div class="post-author">Mia R.</div>
+          <div class="post-time">5h ago</div>
+        </div>
+        <span class="post-tag tag-story">📖 Story</span>
+      </div>
+      <div class="post-text">Switched to a menstrual disc last month and HONESTLY it changed my life. Zero leaks, barely feel it. For anyone scared to try — it took me 3 cycles to get comfortable. Worth it! 🩵</div>
+      <div class="post-actions">
+        <button class="post-action" onclick="likePost(this)"><span class="act-icon">🤍</span> 61</button>
+        <button class="post-action"><span class="act-icon">💬</span> 14 replies</button>
+        <button class="post-action"><span class="act-icon">🔗</span> Share</button>
+      </div>
+    </div>
+ 
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:#D1FAE5;">🌿</div>
+        <div class="post-meta">
+          <div class="post-author">Sophie T.</div>
+          <div class="post-time">Yesterday</div>
+        </div>
+        <span class="post-tag tag-tip">💡 Tip</span>
+      </div>
+      <div class="post-text">Ginger tea + heat patch combo is genuinely better than ibuprofen for me. Add a tiny bit of honey. Share your cramp remedies below! 👇</div>
+      <div class="post-actions">
+        <button class="post-action" onclick="likePost(this)"><span class="act-icon">🤍</span> 43</button>
+        <button class="post-action"><span class="act-icon">💬</span> 31 replies</button>
+        <button class="post-action"><span class="act-icon">🔗</span> Share</button>
+      </div>
+    </div>
+ 
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar">🤍</div>
+        <div class="post-meta">
+          <div class="post-author">Anonymous</div>
+          <div class="post-time">2 days ago</div>
+        </div>
+        <span class="post-tag tag-anon">🔒 Anonymous</span>
+      </div>
+      <div class="post-text">Does anyone else feel really low & emotional the week before their period? I feel like I'm going crazy every month and nobody talks about this enough.</div>
+      <div class="post-actions">
+        <button class="post-action" onclick="likePost(this)"><span class="act-icon">🤍</span> 108</button>
+        <button class="post-action"><span class="act-icon">💬</span> 47 replies</button>
+        <button class="post-action"><span class="act-icon">🔗</span> Share</button>
+      </div>
+    </div>
+ 
+    <div class="ad-banner">📢 Ad — Hana Feminine Wash — Gentle daily care →</div>
+  </div>
+ 
+  <!-- ── POINTS SCREEN ── -->
+  <div id="screen-points" class="screen">
+    <div class="points-hero">
+      <div class="points-label">Your points</div>
+      <div class="points-number">285</div>
+      <div class="points-sub">Top 12% of helpers this month 🏆</div>
+    </div>
+ 
+    <div class="section-label">Your badges</div>
+    <div class="badge-grid">
+      <div class="badge-card">
+        <span class="badge-icon">🌸</span>
+        <div class="badge-name">First responder</div>
+        <div class="badge-desc">Helped for the first time</div>
+      </div>
+      <div class="badge-card">
+        <span class="badge-icon">💫</span>
+        <div class="badge-name">Community star</div>
+        <div class="badge-desc">10 accepted requests</div>
+      </div>
+      <div class="badge-card locked">
+        <span class="badge-icon">🌺</span>
+        <div class="badge-name">Super helper</div>
+        <div class="badge-desc">25 accepted requests</div>
+      </div>
+      <div class="badge-card locked">
+        <span class="badge-icon">👑</span>
+        <div class="badge-name">FlowMate Legend</div>
+        <div class="badge-desc">100 accepted requests</div>
+      </div>
+    </div>
+ 
+    <div class="section-label">How to earn points</div>
+    <div class="card" style="padding:16px;">
+      <div class="helper-row">
+        <div class="helper-avatar" style="background:var(--rose-lt);">🆘</div>
+        <div class="helper-info"><div class="helper-name">Accept a help request</div></div>
+        <div class="helper-pts">+15 pts</div>
+      </div>
+      <div class="helper-row">
+        <div class="helper-avatar" style="background:var(--plum-lt);">💬</div>
+        <div class="helper-info"><div class="helper-name">Answer a community question</div></div>
+        <div class="helper-pts">+5 pts</div>
+      </div>
+      <div class="helper-row">
+        <div class="helper-avatar" style="background:#D1FAE5;">📖</div>
+        <div class="helper-info"><div class="helper-name">Share a story or tip</div></div>
+        <div class="helper-pts">+3 pts</div>
+      </div>
+      <div class="helper-row">
+        <div class="helper-avatar" style="background:#FFF3E4;">🤍</div>
+        <div class="helper-info"><div class="helper-name">Post gets 10+ likes</div></div>
+        <div class="helper-pts">+8 pts</div>
+      </div>
+    </div>
+ 
+    <div class="section-label">Community leaderboard</div>
+    <div class="card" style="padding:16px;">
+      <div class="leader-row">
+        <div class="leader-rank">🥇</div>
+        <div class="leader-av">🌸</div>
+        <div class="leader-name">Sarah K.</div>
+        <div class="leader-pts">840 pts</div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">🥈</div>
+        <div class="leader-av">🌷</div>
+        <div class="leader-name">Priya M.</div>
+        <div class="leader-pts">620 pts</div>
+      </div>
+      <div class="leader-row">
+        <div class="leader-rank">🥉</div>
+        <div class="leader-av">🌼</div>
+        <div class="leader-name">Jess L.</div>
+        <div class="leader-pts">510 pts</div>
+      </div>
+      <div class="leader-row" style="background:var(--rose-lt);border-radius:8px;padding:10px 8px;border:none;">
+        <div class="leader-rank">12</div>
+        <div class="leader-av">✨</div>
+        <div class="leader-name">You</div>
+        <div class="leader-pts" style="color:var(--rose);">285 pts</div>
+      </div>
+    </div>
+ 
+    <div class="section-label">Recent activity</div>
+    <div class="card" style="padding:16px;">
+      <div class="history-row">
+        <div class="history-left">
+          <div class="history-icon">🆘</div>
+          <div>
+            <div class="history-action">Helped with pad request</div>
+            <div class="history-time">Today, 2:14 PM</div>
+          </div>
+        </div>
+        <div class="history-pts">+15</div>
+      </div>
+      <div class="history-row">
+        <div class="history-left">
+          <div class="history-icon" style="background:var(--plum-lt);">💬</div>
+          <div>
+            <div class="history-action">Answered a question</div>
+            <div class="history-time">Yesterday</div>
+          </div>
+        </div>
+        <div class="history-pts">+5</div>
+      </div>
+      <div class="history-row">
+        <div class="history-left">
+          <div class="history-icon" style="background:#FFF3E4;">🤍</div>
+          <div>
+            <div class="history-action">Post reached 10 likes</div>
+            <div class="history-time">3 days ago</div>
+          </div>
+        </div>
+        <div class="history-pts">+8</div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- ── PROFILE SCREEN ── -->
+  <div id="screen-profile" class="screen">
+    <div class="profile-hero">
+      <div class="profile-av">🌸</div>
+      <div class="profile-name">Maya Tan</div>
+      <div class="profile-handle">@mayatan · Singapore</div>
+      <div class="profile-stats">
+        <div><div class="stat-val">12</div><div class="stat-lbl">helped</div></div>
+        <div><div class="stat-val">285</div><div class="stat-lbl">points</div></div>
+        <div><div class="stat-val">8</div><div class="stat-lbl">posts</div></div>
+      </div>
+    </div>
+ 
+    <div class="premium-banner">
+      <div class="premium-text">
+        <h3>Go Premium ✨</h3>
+        <p>Remove ads & support the mission</p>
+      </div>
+      <button class="premium-btn">Upgrade</button>
+    </div>
+ 
+    <div class="section-label">My cycle</div>
+    <div class="cycle-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Next period in ~14 days</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Avg cycle: 31 days</div>
+        </div>
+        <div style="font-size:24px;">📅</div>
+      </div>
+      <div class="cycle-phases">
+        <div class="phase current"><div class="phase-dot"></div>Follicular</div>
+        <div class="phase"><div class="phase-dot"></div>Ovulation</div>
+        <div class="phase"><div class="phase-dot"></div>Luteal</div>
+        <div class="phase"><div class="phase-dot"></div>Menstrual</div>
+      </div>
+      <div class="cycle-bar"><div class="cycle-fill"></div></div>
+      <div class="cycle-note">Day 12 of 31</div>
+    </div>
+ 
+    <div class="section-label">Settings</div>
+    <div class="card" style="padding:4px 16px;">
+      <div class="settings-row">
+        <div class="settings-left">
+          <div class="settings-icon" style="background:var(--rose-lt);">🔔</div>
+          <div class="settings-label">SOS notifications</div>
+        </div>
+        <label class="switch"><input type="checkbox" checked><span class="slider-sw"></span></label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-left">
+          <div class="settings-icon" style="background:var(--plum-lt);">📍</div>
+          <div class="settings-label">Location radius</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="settings-val">1 km</span>
+          <span class="chevron">›</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-left">
+          <div class="settings-icon" style="background:#D1FAE5;">🔒</div>
+          <div class="settings-label">Post anonymously by default</div>
+        </div>
+        <label class="switch"><input type="checkbox" checked><span class="slider-sw"></span></label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-left">
+          <div class="settings-icon" style="background:#FFF3E4;">📢</div>
+          <div class="settings-label">Show ads</div>
+        </div>
+        <label class="switch"><input type="checkbox" checked><span class="slider-sw"></span></label>
+      </div>
+      <div class="settings-row" style="border-bottom:none;">
+        <div class="settings-left">
+          <div class="settings-icon" style="background:var(--rose-lt);">🌐</div>
+          <div class="settings-label">Language</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="settings-val">English</span>
+          <span class="chevron">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+</div>
+ 
+<!-- Ask modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-title">Ask the community ✿</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Your question, your choice — post anonymously or openly, and optionally tag a gynaecologist for expert input.</div>
+    <div class="toggle-row">
+      <div class="toggle-option on" onclick="toggleOpt(this)">🔒 Post anonymously</div>
+      <div class="toggle-option" onclick="toggleOpt(this)">👩‍⚕️ Tag gynaecologist</div>
+      <div class="toggle-option" onclick="toggleOpt(this)">💡 Tip</div>
+      <div class="toggle-option" onclick="toggleOpt(this)">📖 Story</div>
+    </div>
+    <textarea rows="4" placeholder="What's on your mind? Ask freely — this is a safe space 💕"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="closeModal()">Post</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+ 
+<script>
+  function showScreen(name, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+ 
+  function sendSOS() {
+    document.getElementById('sos-normal').style.display = 'none';
+    document.getElementById('sos-sent').classList.add('visible');
+  }
+ 
+  function cancelSOS() {
+    document.getElementById('sos-normal').style.display = 'block';
+    document.getElementById('sos-sent').classList.remove('visible');
+  }
+ 
+  function acceptRequest(btn) {
+    const card = btn.closest('.request-card');
+    card.style.background = 'linear-gradient(135deg, #D1FAE5, #A7F3D0)';
+    card.style.borderColor = '#6EE7B7';
+    btn.textContent = '✓ Accepted! Connecting…';
+    btn.style.background = '#059669';
+    btn.style.boxShadow = 'none';
+    btn.disabled = true;
+    const passBtn = card.querySelector('.btn-ghost');
+    if (passBtn) passBtn.style.display = 'none';
+  }
+ 
+  function toggleChip(chip) {
+    chip.classList.toggle('selected');
+  }
+ 
+  function likePost(btn) {
+    const num = parseInt(btn.textContent.replace(/\D/g,''));
+    btn.innerHTML = '<span class="act-icon">❤️</span> ' + (num + 1);
+    btn.style.color = 'var(--rose)';
+  }
+ 
+  function setFilter(chip) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  }
+ 
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('visible');
+  }
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('visible');
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+  function toggleOpt(el) {
+    el.classList.toggle('on');
+  }
+</script>
+</body>
+</html>
